@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% load election_tags %}
+{% block title %}Dashboard — VoteSecure{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1>🏠 Voter Dashboard</h1>
+        <p>Welcome back, {{ user.username }}! Here are the current elections.</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid-4 mb-3">
+        <div class="stat-card">
+            <div class="stat-icon">🗳️</div>
+            <div class="stat-label">Active Elections</div>
+            <div class="stat-value">{{ active_elections|length }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">📅</div>
+            <div class="stat-label">Upcoming</div>
+            <div class="stat-value">{{ upcoming_elections|length }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-label">My Votes Cast</div>
+            <div class="stat-value">{{ total_votes_cast }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">📊</div>
+            <div class="stat-label">Completed</div>
+            <div class="stat-value">{{ completed_elections|length }}</div>
+        </div>
+    </div>
+
+    <!-- Active Elections -->
+    <div class="section-header">
+        <h2><span class="pulse-dot"></span> Active Elections</h2>
+    </div>
+    {% if active_elections %}
+    <div class="grid-2 mb-3">
+        {% for election in active_elections %}
+        <div class="card fade-in-up">
+            <div class="card-header">
+                <h3 class="card-title">{{ election.title }}</h3>
+                <span class="badge badge-active">● Live</span>
+            </div>
+            <div class="card-body">
+                <p>{{ election.description|truncatewords:25 }}</p>
+                <p class="mt-1 text-muted" style="font-size:0.85rem;">
+                    🕐 Ends: {{ election.end_date|date:"M j, Y g:i A" }}
+                    &nbsp;·&nbsp; 👥 {{ election.vote_count }} votes
+                </p>
+            </div>
+            <div class="card-footer">
+                {% if election.id in voted_election_ids %}
+                <span class="badge badge-voted">✓ Voted</span>
+                <a href="{% url 'election_results' election.pk %}" class="btn btn-secondary btn-sm">View Results</a>
+                {% else %}
+                <a href="{% url 'voting_booth' election.pk %}" class="btn btn-primary btn-sm">Vote Now →</a>
+                {% endif %}
+                <a href="{% url 'election_detail' election.pk %}" class="btn btn-secondary btn-sm">Details</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state mb-3">
+        <div class="icon">🗳️</div>
+        <h3>No active elections</h3>
+        <p>Check back later for upcoming elections.</p>
+    </div>
+    {% endif %}
+
+    <!-- Upcoming Elections -->
+    {% if upcoming_elections %}
+    <div class="section-header"><h2>📅 Upcoming Elections</h2></div>
+    <div class="grid-2 mb-3">
+        {% for election in upcoming_elections %}
+        <div class="card fade-in-up">
+            <div class="card-header">
+                <h3 class="card-title">{{ election.title }}</h3>
+                <span class="badge badge-upcoming">Upcoming</span>
+            </div>
+            <div class="card-body">
+                <p>{{ election.description|truncatewords:20 }}</p>
+                <p class="mt-1 text-muted" style="font-size:0.85rem;">📅 Starts: {{ election.start_date|date:"M j, Y g:i A" }}</p>
+            </div>
+            <div class="card-footer">
+                <a href="{% url 'election_detail' election.pk %}" class="btn btn-secondary btn-sm">View Details</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Completed Elections -->
+    {% if completed_elections %}
+    <div class="section-header"><h2>📊 Recent Results</h2></div>
+    <div class="grid-2">
+        {% for election in completed_elections %}
+        <div class="card fade-in-up">
+            <div class="card-header">
+                <h3 class="card-title">{{ election.title }}</h3>
+                <span class="badge badge-completed">Completed</span>
+            </div>
+            <div class="card-body">
+                <p class="text-muted" style="font-size:0.85rem;">👥 {{ election.vote_count }} total votes</p>
+            </div>
+            <div class="card-footer">
+                <a href="{% url 'election_results' election.pk %}" class="btn btn-secondary btn-sm">View Results</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

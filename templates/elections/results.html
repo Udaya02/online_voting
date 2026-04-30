@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Results — {{ election.title }} — VoteSecure{% endblock %}
+
+{% block extra_css %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1>📊 Election Results</h1>
+        <p>
+            {{ election.title }}
+            &nbsp;·&nbsp;
+            <span class="badge badge-{{ election.computed_status }}">{{ election.computed_status|title }}</span>
+            {% if election.is_active %}&nbsp;·&nbsp; <span class="text-muted">Results update live</span>{% endif %}
+        </p>
+    </div>
+
+    <div class="grid-2 mb-3">
+        <div class="stat-card">
+            <div class="stat-label">Total Votes</div>
+            <div class="stat-value" id="total-votes-count">{{ total_votes }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Candidates</div>
+            <div class="stat-value">{{ candidates|length }}</div>
+        </div>
+    </div>
+
+    <div class="grid-2 mb-3">
+        <!-- Chart -->
+        <div class="chart-container">
+            <h3 style="margin-bottom:1rem;">Vote Distribution</h3>
+            <div style="height:300px; position:relative;">
+                <canvas id="results-chart" data-election-id="{{ election.pk }}" data-is-active="{{ election.is_active|yesno:'true,false' }}"></canvas>
+            </div>
+        </div>
+
+        <!-- Bar Results -->
+        <div class="card">
+            <div class="card-header"><h3 class="card-title">Detailed Results</h3></div>
+            <div class="card-body">
+                {% for candidate in candidates %}
+                <div class="result-bar-container">
+                    <div class="result-bar-header">
+                        <span class="name">{{ candidate.name }} {% if candidate.party %}({{ candidate.party }}){% endif %}</span>
+                        <span class="votes" id="bar-votes-{{ candidate.pk }}">{{ candidate.total_votes }} votes</span>
+                    </div>
+                    <div class="result-bar">
+                        <div class="result-bar-fill" id="bar-fill-{{ candidate.pk }}" style="width: {% if total_votes > 0 %}{{ candidate.total_votes|floatformat:0 }}{% else %}0{% endif %}{% if total_votes > 0 %}; width: calc({{ candidate.total_votes }} / {{ total_votes }} * 100%){% endif %};"></div>
+                    </div>
+                    <div class="result-percentage" id="bar-pct-{{ candidate.pk }}">
+                        {% if total_votes > 0 %}
+                            {% widthratio candidate.total_votes total_votes 100 %}%
+                        {% else %}
+                            0%
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    {% if has_voted %}
+    <div class="alert alert-info">✓ You voted in this election.</div>
+    {% endif %}
+
+    <a href="{% url 'voter_dashboard' %}" class="btn btn-secondary">← Back to Dashboard</a>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/results.js' %}"></script>
+{% endblock %}

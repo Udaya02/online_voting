@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}{{ election.title }} — VoteSecure{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1>{{ election.title }}</h1>
+        <p>
+            <span class="badge badge-{{ election.computed_status }}">{{ election.computed_status|title }}</span>
+            &nbsp;·&nbsp; {{ election.total_candidates }} candidates &nbsp;·&nbsp; {{ election.total_votes }} votes cast
+        </p>
+    </div>
+
+    <div class="grid-2">
+        <div class="card">
+            <div class="card-header"><h3 class="card-title">Election Details</h3></div>
+            <div class="card-body">
+                <p>{{ election.description|default:"No description provided." }}</p>
+                <div class="mt-2" style="display:grid; gap:0.75rem;">
+                    <div><span class="text-muted">Start:</span> {{ election.start_date|date:"F j, Y g:i A" }}</div>
+                    <div><span class="text-muted">End:</span> {{ election.end_date|date:"F j, Y g:i A" }}</div>
+                    <div><span class="text-muted">Created by:</span> {{ election.created_by.username }}</div>
+                </div>
+            </div>
+            <div class="card-footer">
+                {% if election.is_active and not has_voted %}
+                <a href="{% url 'voting_booth' election.pk %}" class="btn btn-primary">Vote Now →</a>
+                {% elif has_voted %}
+                <span class="badge badge-voted">✓ You have voted</span>
+                <a href="{% url 'election_results' election.pk %}" class="btn btn-secondary btn-sm">View Results</a>
+                {% endif %}
+                {% if election.is_completed or election.is_public %}
+                <a href="{% url 'election_results' election.pk %}" class="btn btn-secondary btn-sm">📊 Results</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header"><h3 class="card-title">Candidates</h3></div>
+            <div class="card-body">
+                {% for candidate in candidates %}
+                <div style="display:flex; align-items:center; gap:1rem; padding:0.75rem 0; border-bottom:1px solid var(--border);">
+                    <div class="candidate-avatar">
+                        {% if candidate.photo %}
+                        <img src="{{ candidate.photo.url }}" alt="{{ candidate.name }}">
+                        {% else %}
+                        {{ candidate.name|first }}
+                        {% endif %}
+                    </div>
+                    <div>
+                        <h4 style="font-size:1rem;">{{ candidate.name }}</h4>
+                        {% if candidate.party %}<p class="text-muted" style="font-size:0.85rem;">{{ candidate.party }}</p>{% endif %}
+                        {% if candidate.bio %}<p style="font-size:0.85rem; color:var(--text-medium); margin-top:4px;">{{ candidate.bio|truncatewords:15 }}</p>{% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-muted">No candidates added yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-2">
+        <a href="{% url 'voter_dashboard' %}" class="btn btn-secondary">← Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %}

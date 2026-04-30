@@ -1,0 +1,68 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login — VoteSecure</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    {% if messages %}
+    <div class="toast-container">
+        {% for message in messages %}
+        <div class="toast alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="auth-page">
+        <div class="auth-container">
+            <div class="auth-header">
+                <div class="logo-icon">🗳️</div>
+                <h1>Welcome Back</h1>
+                <p>Sign in to your VoteSecure account</p>
+            </div>
+
+            {% if form.non_field_errors %}
+            <div class="alert alert-error">
+                {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+            </div>
+            {% endif %}
+
+            <form method="post" action="{% url 'login' %}" id="login-form">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label class="form-label" for="id_login_username">Username</label>
+                    {{ form.username }}
+                    {% if form.username.errors %}<p class="form-error">{{ form.username.errors.0 }}</p>{% endif %}
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="id_login_password">Password</label>
+                    {{ form.password }}
+                    {% if form.password.errors %}<p class="form-error">{{ form.password.errors.0 }}</p>{% endif %}
+                </div>
+                <button type="submit" class="btn btn-primary btn-block btn-lg" id="login-btn">Sign In</button>
+            </form>
+
+            <div class="auth-footer">
+                <p>Don't have an account? <a href="{% url 'register' %}">Create one</a></p>
+            </div>
+
+            <div class="auth-footer mt-1">
+                <details style="color: var(--text-light); font-size: 0.85rem;">
+                    <summary style="cursor:pointer;">Didn't receive verification email?</summary>
+                    <form method="post" action="{% url 'resend_verification' %}" class="mt-1">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <input type="email" name="email" class="form-input" placeholder="Enter your email" required>
+                        </div>
+                        <button type="submit" class="btn btn-secondary btn-sm btn-block">Resend Verification</button>
+                    </form>
+                </details>
+            </div>
+        </div>
+    </div>
+    <script src="{% static 'js/main.js' %}"></script>
+</body>
+</html>

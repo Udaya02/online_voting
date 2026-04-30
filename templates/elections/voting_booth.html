@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Vote — {{ election.title }} — VoteSecure{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width:800px;">
+    <div class="page-header text-center">
+        <h1>🗳️ Cast Your Vote</h1>
+        <p>{{ election.title }}</p>
+    </div>
+
+    <form method="post" action="{% url 'voting_booth' election.pk %}" id="vote-form">
+        {% csrf_token %}
+        <input type="hidden" name="candidate_id" id="selected-candidate" value="">
+
+        <div style="display:grid; gap:1rem; margin-bottom:2rem;">
+            {% for candidate in candidates %}
+            <div class="candidate-card" data-candidate-id="{{ candidate.pk }}" data-candidate-name="{{ candidate.name }}">
+                <div class="candidate-radio"></div>
+                <div class="candidate-avatar">
+                    {% if candidate.photo %}
+                    <img src="{{ candidate.photo.url }}" alt="{{ candidate.name }}">
+                    {% else %}
+                    {{ candidate.name|first }}
+                    {% endif %}
+                </div>
+                <div class="candidate-info">
+                    <h3>{{ candidate.name }}</h3>
+                    {% if candidate.party %}<span class="party">{{ candidate.party }}</span>{% endif %}
+                    {% if candidate.bio %}<p class="bio">{{ candidate.bio }}</p>{% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="text-center">
+            <button type="button" class="btn btn-secondary btn-lg" id="submit-vote-btn" disabled>
+                Select a Candidate to Vote
+            </button>
+        </div>
+    </form>
+
+    <div class="mt-2 text-center">
+        <a href="{% url 'election_detail' election.pk %}" class="btn btn-secondary btn-sm">← Back to Election</a>
+    </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div class="modal-overlay" id="confirm-modal">
+    <div class="modal">
+        <h2>Confirm Your Vote</h2>
+        <p>You are about to vote for <strong id="confirm-candidate-name"></strong>. This action cannot be undone.</p>
+        <div class="modal-actions">
+            <button class="btn btn-secondary" id="cancel-vote">Cancel</button>
+            <button class="btn btn-primary" id="confirm-vote">✓ Confirm Vote</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/voting.js' %}"></script>
+{% endblock %}

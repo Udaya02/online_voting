@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Admin Dashboard — VoteSecure{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header flex-between">
+        <div>
+            <h1>📊 Admin Dashboard</h1>
+            <p>System overview and election management</p>
+        </div>
+        <a href="{% url 'create_election' %}" class="btn btn-primary">➕ New Election</a>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid-4 mb-3" id="admin-stats">
+        <div class="stat-card">
+            <div class="stat-icon">🗳️</div>
+            <div class="stat-label">Total Elections</div>
+            <div class="stat-value" id="stat-total-elections" data-count="{{ total_elections }}">{{ total_elections }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">⚡</div>
+            <div class="stat-label">Active Now</div>
+            <div class="stat-value" id="stat-active-elections" data-count="{{ active_elections }}">{{ active_elections }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-label">Total Votes</div>
+            <div class="stat-value" id="stat-total-votes" data-count="{{ total_votes }}">{{ total_votes }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-label">Registered Voters</div>
+            <div class="stat-value" id="stat-total-voters" data-count="{{ total_voters }}">{{ total_voters }}</div>
+        </div>
+    </div>
+
+    <!-- Elections Table -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">All Elections</h3>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Status</th>
+                        <th>Start</th>
+                        <th>End</th>
+                        <th>Votes</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for election in recent_elections %}
+                    <tr>
+                        <td><strong>{{ election.title }}</strong></td>
+                        <td><span class="badge badge-{{ election.computed_status }}">{{ election.computed_status|title }}</span></td>
+                        <td>{{ election.start_date|date:"M j, Y" }}</td>
+                        <td>{{ election.end_date|date:"M j, Y" }}</td>
+                        <td>{{ election.total_votes }}</td>
+                        <td>
+                            <div class="flex gap-1">
+                                <a href="{% url 'manage_election' election.pk %}" class="btn btn-secondary btn-sm">Manage</a>
+                                <a href="{% url 'edit_election' election.pk %}" class="btn btn-secondary btn-sm">Edit</a>
+                                <a href="{% url 'election_results' election.pk %}" class="btn btn-secondary btn-sm">Results</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="6" class="text-center text-muted" style="padding:2rem;">No elections created yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/admin.js' %}"></script>
+{% endblock %}

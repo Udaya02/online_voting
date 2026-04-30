@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}Manage — {{ election.title }} — VoteSecure{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header flex-between">
+        <div>
+            <h1>{{ election.title }}</h1>
+            <p>
+                <span class="badge badge-{{ election.computed_status }}">{{ election.computed_status|title }}</span>
+                &nbsp;·&nbsp; {{ total_votes }} votes &nbsp;·&nbsp; {{ candidates|length }} candidates
+            </p>
+        </div>
+        <div class="flex gap-1">
+            <a href="{% url 'add_candidate' election.pk %}" class="btn btn-primary btn-sm">➕ Add Candidate</a>
+            <a href="{% url 'edit_election' election.pk %}" class="btn btn-secondary btn-sm">✏️ Edit</a>
+            <form method="post" action="{% url 'delete_election' election.pk %}" class="delete-form" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger btn-sm">🗑️ Delete</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Election Info -->
+    <div class="grid-3 mb-3">
+        <div class="stat-card">
+            <div class="stat-label">Start Date</div>
+            <div style="font-size:1rem; font-weight:600;">{{ election.start_date|date:"M j, Y g:i A" }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">End Date</div>
+            <div style="font-size:1rem; font-weight:600;">{{ election.end_date|date:"M j, Y g:i A" }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Total Votes</div>
+            <div class="stat-value">{{ total_votes }}</div>
+        </div>
+    </div>
+
+    <!-- Candidates Table -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Candidates</h3>
+            <a href="{% url 'add_candidate' election.pk %}" class="btn btn-primary btn-sm">➕ Add</a>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr><th>Name</th><th>Party</th><th>Votes</th><th>Share</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                    {% for candidate in candidates %}
+                    <tr>
+                        <td>
+                            <div class="flex gap-1" style="align-items:center;">
+                                <div class="candidate-avatar" style="width:36px;height:36px;font-size:0.8rem;">
+                                    {% if candidate.photo %}<img src="{{ candidate.photo.url }}" alt="">{% else %}{{ candidate.name|first }}{% endif %}
+                                </div>
+                                <strong>{{ candidate.name }}</strong>
+                            </div>
+                        </td>
+                        <td>{{ candidate.party|default:"-" }}</td>
+                        <td>{{ candidate.total_votes }}</td>
+                        <td>{% if total_votes > 0 %}{% widthratio candidate.total_votes total_votes 100 %}%{% else %}0%{% endif %}</td>
+                        <td>
+                            <div class="flex gap-1">
+                                <a href="{% url 'edit_candidate' candidate.pk %}" class="btn btn-secondary btn-sm">Edit</a>
+                                <form method="post" action="{% url 'delete_candidate' candidate.pk %}" class="delete-form" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="text-center text-muted" style="padding:2rem;">No candidates yet. Add some!</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="mt-2 flex gap-1">
+        <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">← Back to Admin</a>
+        <a href="{% url 'election_results' election.pk %}" class="btn btn-secondary">📊 View Results</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.querySelectorAll('.delete-form').forEach(f => {
+    f.addEventListener('submit', e => { if(!confirm('Are you sure?')) e.preventDefault(); });
+});
+</script>
+{% endblock %}

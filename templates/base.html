@@ -1,0 +1,49 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="VoteSecure — Secure Online Voting Platform">
+    <title>{% block title %}VoteSecure{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% if user.is_authenticated %}
+    <nav class="navbar" id="main-navbar">
+        <a href="{% url 'voter_dashboard' %}" class="navbar-brand">
+            <span class="logo-icon">🗳️</span>
+            VoteSecure
+        </a>
+        <button class="navbar-toggle" id="navbar-toggle" onclick="document.getElementById('nav-links').classList.toggle('open')">☰</button>
+        <ul class="navbar-links" id="nav-links">
+            {% if user.is_staff %}
+            <li><a href="{% url 'admin_dashboard' %}" class="{% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">📊 Admin Panel</a></li>
+            <li><a href="{% url 'create_election' %}">➕ New Election</a></li>
+            {% endif %}
+            <li><a href="{% url 'voter_dashboard' %}" class="{% if request.resolver_match.url_name == 'voter_dashboard' %}active{% endif %}">🏠 Dashboard</a></li>
+            <li><a href="{% url 'profile' %}" class="{% if request.resolver_match.url_name == 'profile' %}active{% endif %}">👤 Profile</a></li>
+            <li><a href="{% url 'logout' %}">🚪 Logout</a></li>
+        </ul>
+    </nav>
+    {% endif %}
+
+    {% if messages %}
+    <div class="toast-container" id="toast-container">
+        {% for message in messages %}
+        <div class="toast alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

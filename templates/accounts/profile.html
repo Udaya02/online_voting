@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}My Profile — VoteSecure{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1>👤 My Profile</h1>
+        <p>Manage your voter profile information</p>
+    </div>
+
+    <div class="grid-2">
+        <div class="card">
+            <div class="card-header"><h3 class="card-title">Profile Information</h3></div>
+            <form method="post" action="{% url 'profile' %}">
+                {% csrf_token %}
+                {% for field in form %}
+                <div class="form-group">
+                    <label class="form-label">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}<p class="form-error">{{ field.errors.0 }}</p>{% endif %}
+                </div>
+                {% endfor %}
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <div class="card-header"><h3 class="card-title">Account Details</h3></div>
+            <div class="card-body">
+                <div class="form-group">
+                    <label class="form-label">Voter ID</label>
+                    <p style="font-family: monospace; font-size: 1.1rem; color: var(--primary);">{{ profile.voter_id }}</p>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Username</label>
+                    <p>{{ user.username }}</p>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <p>{{ user.email }}</p>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Verification Status</label>
+                    {% if profile.is_verified %}
+                    <span class="badge badge-active">✓ Verified</span>
+                    {% else %}
+                    <span class="badge badge-cancelled">✗ Not Verified</span>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Member Since</label>
+                    <p>{{ profile.created_at|date:"F j, Y" }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

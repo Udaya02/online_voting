@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}{% if is_edit %}Edit{% else %}Create{% endif %} Election — VoteSecure{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width:700px;">
+    <div class="page-header">
+        <h1>{% if is_edit %}✏️ Edit Election{% else %}➕ Create Election{% endif %}</h1>
+        <p>{% if is_edit %}Modify "{{ election.title }}"{% else %}Set up a new election{% endif %}</p>
+    </div>
+
+    <div class="card">
+        {% if form.non_field_errors %}
+        <div class="alert alert-error">{% for e in form.non_field_errors %}{{ e }}{% endfor %}</div>
+        {% endif %}
+
+        <form method="post" action="{% if is_edit %}{% url 'edit_election' election.pk %}{% else %}{% url 'create_election' %}{% endif %}">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="form-group">
+                <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}<p class="form-help">{{ field.help_text }}</p>{% endif %}
+                {% if field.errors %}<p class="form-error">{{ field.errors.0 }}</p>{% endif %}
+            </div>
+            {% endfor %}
+            <div class="flex gap-1 mt-2">
+                <button type="submit" class="btn btn-primary">{% if is_edit %}Save Changes{% else %}Create Election{% endif %}</button>
+                <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
