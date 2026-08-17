@@ -14,12 +14,20 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-fallback-key')
 DEBUG = os.getenv('DEBUG', 'True').lower() in ('true', '1', 'yes')
 
+RAILWAY_HOST = 'onlinevoting-production-202d.up.railway.app'
+
 ALLOWED_HOSTS = [h.strip() for h in os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',') if h.strip()]
+if RAILWAY_HOST not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(RAILWAY_HOST)
+
 CSRF_TRUSTED_ORIGINS = [
     origin.strip()
     for origin in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',')
     if origin.strip()
 ]
+railway_origin = f'https://{RAILWAY_HOST}'
+if railway_origin not in CSRF_TRUSTED_ORIGINS:
+    CSRF_TRUSTED_ORIGINS.append(railway_origin)
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -112,12 +120,16 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = 'VoteSecure <noreply@votesecure.app>'
 
-SITE_URL = os.getenv('SITE_URL', 'http://localhost:8080')
+SITE_URL = os.getenv('SITE_URL', f'https://{RAILWAY_HOST}')
 
 SESSION_COOKIE_AGE = 3600
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'Lax'
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+# Railway terminates TLS at its proxy. Tell Django to trust the forwarded
+# HTTPS scheme so CSRF referer/origin checks work correctly in production.
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 if not DEBUG:
     SECURE_BROWSER_XSS_FILTER = True
